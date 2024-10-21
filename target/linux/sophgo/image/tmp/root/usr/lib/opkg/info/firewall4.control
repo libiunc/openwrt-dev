@@ -1,0 +1,14 @@
+Package: firewall4
+Version: 2024.05.21~4c01d1eb-r1
+Depends: ucode (>=2022.03.22), libc, kmod-nft-core, kmod-nft-fib, kmod-nft-offload, kmod-nft-nat, nftables-json, ucode, ucode-mod-fs, ucode-mod-ubus, ucode-mod-uci
+Provides: uci-firewall
+Source: feeds/base/network/config/firewall4
+SourceName: firewall4
+License: ISC
+Section: net
+SourceDateEpoch: 1716274753
+Maintainer: Jo-Philipp Wich <jo@mein.io>
+Architecture: riscv64_riscv64
+Installed-Size: 163840
+Description:  This package provides an nftables-based implementation of the UCI firewall
+ sharing the same configuration format.

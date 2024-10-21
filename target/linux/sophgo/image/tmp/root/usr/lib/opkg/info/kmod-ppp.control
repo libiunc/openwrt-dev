@@ -1,0 +1,12 @@
+Package: kmod-ppp
+Version: 6.6.52-r1
+Depends: kernel (=6.6.52~dd5bc209ec159a981643ca48bd26931a-r1), kmod-lib-crc-ccitt, kmod-slhc
+Source: feeds/base/kernel/linux
+SourceName: kernel
+License: GPL-2.0-only
+LicenseFiles: COPYING
+Section: kernel
+SourceDateEpoch: 1726947598
+Architecture: riscv64_riscv64
+Installed-Size: 143360
+Description:  Kernel modules for PPP support

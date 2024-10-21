@@ -1,0 +1,12 @@
+Package: kmod-pppoe
+Version: 6.6.52-r1
+Depends: kernel (=6.6.52~dd5bc209ec159a981643ca48bd26931a-r1), kmod-ppp, kmod-pppox
+Source: feeds/base/kernel/linux
+SourceName: kernel
+License: GPL-2.0-only
+LicenseFiles: COPYING
+Section: kernel
+SourceDateEpoch: 1726947598
+Architecture: riscv64_riscv64
+Installed-Size: 40960
+Description:  Kernel module for PPPoE (PPP over Ethernet) support

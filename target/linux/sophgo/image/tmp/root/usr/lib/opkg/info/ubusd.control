@@ -1,0 +1,13 @@
+Package: ubusd
+Version: 2023.11.28~f84eb599-r1
+Depends: libc, libubox20240329, libblobmsg-json20240329
+Source: feeds/base/system/ubus
+SourceName: ubus
+License: LGPL-2.1
+Section: base
+Require-User: ubus=81:ubus=81
+SourceDateEpoch: 1712395458
+Maintainer: Felix Fietkau <nbd@nbd.name>
+Architecture: riscv64_riscv64
+Installed-Size: 40960
+Description:  OpenWrt RPC daemon

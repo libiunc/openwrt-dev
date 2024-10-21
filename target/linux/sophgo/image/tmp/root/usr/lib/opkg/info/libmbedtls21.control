@@ -1,0 +1,18 @@
+Package: libmbedtls21
+Version: 3.6.0-r1
+Depends: libc
+Provides: libmbedtls
+Source: feeds/base/libs/mbedtls
+SourceName: mbedtls
+License: GPL-2.0-or-later
+LicenseFiles: gpl-2.0.txt
+Section: libs
+SourceDateEpoch: 1717144386
+URL: https://tls.mbed.org
+ABIVersion: 21
+CPE-ID: cpe:/a:arm:mbed_tls
+Architecture: riscv64_riscv64
+Installed-Size: 614400
+Description:  The aim of the mbedtls project is to provide a quality, open-source
+ cryptographic library written in C and targeted at embedded systems.
+ This package contains the mbedtls library.
