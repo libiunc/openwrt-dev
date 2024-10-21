@@ -85,17 +85,22 @@ platform_do_upgrade() {
 	dlink,dir-1960-a1|\
         dlink,dir-2055-a1|\
 	dlink,dir-2150-a1|\
+	dlink,dir-2150-r1|\
 	dlink,dir-2640-a1|\
 	dlink,dir-2660-a1|\
 	dlink,dir-3040-a1|\
 	dlink,dir-3060-a1|\
 	dlink,dir-853-a3|\
+	elecom,wmc-x1800gst|\
+	elecom,wsc-x1800gs|\
 	etisalat,s3|\
 	h3c,tx1800-plus|\
 	h3c,tx1801-plus|\
 	h3c,tx1806|\
 	haier,har-20s2u1|\
 	hiwifi,hc5962|\
+	gemtek,wvrtm-127acn|\
+	gemtek,wvrtm-130acn|\
 	iptime,a3004t|\
 	iptime,ax2004m|\
 	iptime,t5004|\
