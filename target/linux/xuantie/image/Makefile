@@ -40,4 +40,20 @@ define Image/Build
 	$(call Image/Build/gzip/$(1))
 endef
 
+define Device/Default
+  PROFILES := Default
+  KERNEL_NAME := Image
+  KERNEL := kernel-bin
+  IMAGES := sdcard.img.gz
+  IMAGE/sdcard.img.gz := riscv-sdcard | append-metadata | gzip
+endef
+
+define Device/licheepi4a
+  DEVICE_VENDOR := Sipeed
+  DEVICE_MODEL := Sipeed Lichee Pi 4A
+  DEVICE_DTS := th1520/th1520-lichee-pi-4a th1520-lichee-pi-4a-16g
+  DEVICE_PACKAGES := kmod-rtl8723bs | riscv-sdcard | append-metadata | gzip
+endef
+TARGET_DEVICES += licheepi4a
+
 $(eval $(call BuildImage))
