@@ -50,7 +50,7 @@ endef
 
 define Device/licheepi4a
   DEVICE_VENDOR := Sipeed
-  DEVICE_MODEL := Sipeed Lichee Pi 4A
+  DEVICE_MODEL := Lichee Pi 4A
   DEVICE_DTS := th1520/th1520-lichee-pi-4a th1520-lichee-pi-4a-16g
   DEVICE_PACKAGES := kmod-rtl8723bs | riscv-sdcard | append-metadata | gzip
 endef
