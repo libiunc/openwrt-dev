@@ -7,10 +7,10 @@ include $(TOPDIR)/rules.mk
 
 ARCH:=riscv64
 BOARD:=sophgo
-BOARDNAME:=Sophgo CV1800B
+BOARDNAME:=Sophgo Risc-V
 FEATURES:=ext4
 KERNELNAME:=Image dtbs
-SUBTARGETS:=milkv_duo
+SUBTARGETS:=generic
 
 
 KERNEL_PATCHVER:=6.6
@@ -20,7 +20,7 @@ KERNEL_PATCHVER:=6.6
 include $(INCLUDE_DIR)/target.mk
 
 define Target/Description
-	Build firmware images for the Sophgo CV1800B Boards. 
+	Build firmware images for Sophgo RISC-V Boards. 
 endef
 
 $(eval $(call BuildTarget))

@@ -18,6 +18,24 @@ endef
 
 $(eval $(call Image/gzip-ext4-padded-squashfs))
 
+define Device/milk_duo
+  $(call Device/Default)
+  DEVICE_VENDOR := Milk
+  DEVICE_MODEL := Duo
+  DEVICE_DTS := sophgo/duo
+  UBOOT := milk_duo
+endef
+TARGET_DEVICES += milk_duo
+
+define Device/milk_duos
+  $(call Device/Default)
+  DEVICE_VENDOR := Milk
+  DEVICE_MODEL := Duo S
+  DEVICE_DTS := sophgo/duos
+  UBOOT := milk_duos
+endef
+TARGET_DEVICES += milk_duos
+
 define Image/Build
 	$(call Image/Build/$(1))
 	genimage --rootpath $(call mkfs_target_dir,$(1)) --inputpath ${PWD}/image/input --outputpath $(BIN_DIR)
