@@ -189,7 +189,7 @@ $(eval $(call KernelPackage,crypto-cts))
 
 define KernelPackage/crypto-deflate
   TITLE:=Deflate compression CryptoAPI module
-  DEPENDS:=+kmod-lib-zlib-inflate +kmod-lib-zlib-deflate +kmod-crypto-acompress
+  DEPENDS:=+kmod-lib-zlib-inflate +kmod-lib-zlib-deflate kmod-crypto-acompress
   KCONFIG:=CONFIG_CRYPTO_DEFLATE
   FILES:=$(LINUX_DIR)/crypto/deflate.ko
   AUTOLOAD:=$(call AutoLoad,09,deflate)
@@ -249,6 +249,15 @@ endef
 
 $(eval $(call KernelPackage,crypto-echainiv))
 
+define KernelPackage/crypto-engine
+  TITLE:=Crypto engine
+  KCONFIG:=CONFIG_CRYPTO_ENGINE
+  FILES:=$(LINUX_DIR)/crypto/crypto_engine.ko
+  AUTOLOAD:=$(call AutoLoad,09,crypto_engine)
+  $(call AddDepends/crypto, +kmod-crypto-rsa +kmod-crypto-kpp)
+endef
+
+$(eval $(call KernelPackage,crypto-engine))
 
 define KernelPackage/crypto-essiv
   TITLE:=ESSIV support for block encryption

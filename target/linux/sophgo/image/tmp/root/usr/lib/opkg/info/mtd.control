@@ -1,0 +1,12 @@
+Package: mtd
+Version: 26
+Depends: libc, libubox20240329
+Source: feeds/base/system/mtd
+SourceName: mtd
+License: GPL-2.0+
+Section: utils
+SourceDateEpoch: 1723673600
+Architecture: riscv64_riscv64
+Installed-Size: 30720
+Description:  This package contains an utility useful to upgrade from other firmware or 
+ older OpenWrt releases.

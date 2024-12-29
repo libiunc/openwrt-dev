@@ -1,0 +1,14 @@
+Package: procd
+Version: 2024.07.07~f230c117-r1
+Depends: libc, ubusd, ubus, libjson-script20240329, ubox, libubox20240329, libudebug, libubus20231128, libblobmsg-json20240329, libjson-c5, jshn
+Conflicts: procd-selinux
+Source: feeds/base/system/procd
+SourceName: procd
+License: GPL-2.0
+Section: base
+Require-User: :dialout=20 :audio=29
+SourceDateEpoch: 1720383952
+Maintainer: John Crispin <john@phrozen.org>
+Architecture: riscv64_riscv64
+Installed-Size: 174080
+Description:  OpenWrt system process manager

@@ -1,0 +1,12 @@
+Package: uci
+Version: 2023.08.10~5781664d-r1
+Depends: libc, libuci20130104
+Source: feeds/base/system/uci
+SourceName: uci
+License: LGPL-2.1
+Section: base
+SourceDateEpoch: 1712395458
+Maintainer: Felix Fietkau <nbd@nbd.name>
+Architecture: riscv64_riscv64
+Installed-Size: 30720
+Description:  Utility for the Unified Configuration Interface (UCI)

@@ -1,0 +1,12 @@
+Package: odhcp6c
+Version: 2023.05.12~bcd28363-r20
+Depends: libc, libubox20240329
+Source: feeds/base/network/ipv6/odhcp6c
+SourceName: odhcp6c
+License: GPL-2.0
+Section: net
+SourceDateEpoch: 1712395458
+Maintainer: Hans Dedecker <dedeckeh@gmail.com>
+Architecture: riscv64_riscv64
+Installed-Size: 71680
+Description:  Embedded DHCPv6-client for OpenWrt

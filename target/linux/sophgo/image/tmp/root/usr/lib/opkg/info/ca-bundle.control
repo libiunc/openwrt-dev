@@ -1,0 +1,13 @@
+Package: ca-bundle
+Version: 20240203-r1
+Depends: libc
+Provides: ca-certs
+Source: feeds/base/system/ca-certificates
+SourceName: ca-certificates
+License: GPL-2.0-or-later MPL-2.0
+LicenseFiles: debian/copyright
+Section: base
+SourceDateEpoch: 1711053893
+Architecture: all
+Installed-Size: 225280
+Description:  System CA certificates as a bundle

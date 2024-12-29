@@ -1,0 +1,15 @@
+Package: dnsmasq
+Version: 2.90-r3
+Depends: libc, libubus20231128
+Source: feeds/base/network/services/dnsmasq
+SourceName: dnsmasq
+License: GPL-2.0
+LicenseFiles: COPYING
+Section: net
+Require-User: dnsmasq=453:dnsmasq=453
+SourceDateEpoch: 1724527517
+URL: http://www.thekelleys.org.uk/dnsmasq/
+CPE-ID: cpe:/a:thekelleys:dnsmasq
+Architecture: riscv64_riscv64
+Installed-Size: 307200
+Description:  It is intended to provide coupled DNS and DHCP service to a LAN.
