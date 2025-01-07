@@ -11,7 +11,7 @@ include $(TOPDIR)/rules.mk
 PKG_VERSION:=2.10
 PKG_RELEASE:=1
 
-PKG_HASH:=88215a62291b9ba87da8e50b077741103cdc08fb6c9e1ebd34dfaace746d3201
+PKG_HASH:=skip
 
 PKG_LICENSE:=BSD-3-Clause
 PKG_LICENSE_FILES:=license.md
@@ -23,29 +23,17 @@ include $(INCLUDE_DIR)/trusted-firmware-a.mk
 include $(INCLUDE_DIR)/package.mk
 
 define Trusted-Firmware-A/Default
-	BUILD_TARGET:=sunxi
+	BUILD_TARGET:=sophgo-arm
 	BUILD_SUBTARGET:=cortexa53
 endef
 
-define Trusted-Firmware-A/sunxi-a64
-	NAME:=Allwinner A64
-	PLAT:=sun50i_a64
-endef
-
-define Trusted-Firmware-A/sunxi-h6
-	NAME:=Allwinner H6
-	PLAT:=sun50i_h6
-endef
-
-define Trusted-Firmware-A/sunxi-h616
-	NAME:=Allwinner H616
-	PLAT:=sun50i_h616
+define Trusted-Firmware-A/sophgo-arm-sg200x
+	NAME:=sophgo SG200x 
+	PLAT:=sg200x
 endef
 
 TFA_TARGETS:= \
-	sunxi-a64 \
-	sunxi-h6 \
-	sunxi-h616
+	sg200x
 
 define Package/trusted-firmware-a/install
 	$(INSTALL_DIR) $(STAGING_DIR_IMAGE)
