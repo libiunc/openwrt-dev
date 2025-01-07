@@ -20,6 +20,25 @@ endef
 $(eval $(call KernelPackage,camera-bcm2835))
 
 
+define KernelPackage/rp1-cfe
+  TITLE:=RP1 Camera Front-End
+  SUBMENU:=$(VIDEO_MENU)
+  KCONFIG:= \
+     CONFIG_VIDEO_RP1_CFE \
+     CONFIG_VIDEO_BCM2835
+  FILES:=$(LINUX_DIR)/drivers/media/platform/raspberrypi/rp1_cfe/rp1-cfe.ko
+  AUTOLOAD:=$(call AutoLoad,67,rp1-cfe)
+  DEPENDS:=@TARGET_bcm27xx_bcm2712 +kmod-video-core +kmod-video-fwnode +kmod-video-dma-contig +kmod-video-async
+endef
+
+define KernelPackage/rp1-cfe/description
+  Driver for the Camera Serial Interface (CSI) to capture video
+  streams from connected cameras.
+endef
+
+$(eval $(call KernelPackage,rp1-cfe))
+
+
 define KernelPackage/codec-bcm2835
   TITLE:=BCM2835 Video Codec
   KCONFIG:= \
@@ -156,7 +175,7 @@ define KernelPackage/drm-rp1-dpi
     CONFIG_DRM_TTM_HELPER=n
   FILES:=$(LINUX_DIR)/drivers/gpu/drm/rp1/rp1-dpi/drm-rp1-dpi.ko
   AUTOLOAD:=$(call AutoLoad,67,drm-rp1-dpi)
-  DEPENDS:=@TARGET_bcm27xx_bcm2712 +kmod-drm-vc4
+  DEPENDS:=@TARGET_bcm27xx_bcm2712 +kmod-drm-vc4 +kmod-rp1-pio
 endef
 
 define KernelPackage/drm-rp1-dpi/description
