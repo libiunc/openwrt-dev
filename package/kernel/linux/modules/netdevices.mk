@@ -575,6 +575,23 @@ endef
 
 $(eval $(call KernelPackage,dsa-b53-mdio))
 
+define KernelPackage/dsa-mv88e6060
+  SUBMENU:=$(NETWORK_DEVICES_MENU)
+  TITLE:=Marvell MV88E6060 DSA Switch
+  DEPENDS:=+kmod-dsa +kmod-phy-marvell
+  KCONFIG:=CONFIG_NET_DSA_TAG_TRAILER \
+  CONFIG_NET_DSA_MV88E6060
+  FILES:= \
+  $(LINUX_DIR)/drivers/net/dsa/mv88e6060.ko \
+  $(LINUX_DIR)/net/dsa/tag_trailer.ko
+  AUTOLOAD:=$(call AutoLoad,41,mv88e6060,1)
+endef
+
+define KernelPackage/dsa-mv88e6060/description
+  Kernel modules for MV88E6060 DSA switches
+endef
+
+$(eval $(call KernelPackage,dsa-mv88e6060))
 
 define KernelPackage/dsa-tag-dsa
   SUBMENU:=$(NETWORK_DEVICES_MENU)
@@ -953,7 +970,7 @@ $(eval $(call KernelPackage,8139cp))
 define KernelPackage/r8169
   SUBMENU:=$(NETWORK_DEVICES_MENU)
   TITLE:=RealTek RTL-8169 PCI Gigabit Ethernet Adapter kernel support
-  DEPENDS:=@PCI_SUPPORT +kmod-mii +r8169-firmware +kmod-phy-realtek +kmod-mdio-devres
+  DEPENDS:=@PCI_SUPPORT +kmod-mii +r8169-firmware +kmod-phy-realtek +kmod-mdio-devres +kmod-hwmon-core
   KCONFIG:= \
     CONFIG_R8169 \
     CONFIG_R8169_LEDS=y
@@ -1525,6 +1542,28 @@ endef
 
 $(eval $(call KernelPackage,bnx2x))
 
+define KernelPackage/bnxt-en
+  SUBMENU:=$(NETWORK_DEVICES_MENU)
+  TITLE:=Broadcom NetXtreme-C/E network driver
+  DEPENDS:=@PCI_SUPPORT +kmod-hwmon-core +kmod-lib-crc32c +kmod-mdio +kmod-ptp
+  FILES:=$(LINUX_DIR)/drivers/net/ethernet/broadcom/bnxt/bnxt_en.ko
+  KCONFIG:= \
+	  CONFIG_BNXT \
+	  CONFIG_BNXT_SRIOV=y \
+	  CONFIG_BNXT_FLOWER_OFFLOAD=y \
+	  CONFIG_BNXT_DCB=n \
+	  CONFIG_BNXT_HWMON=y
+  AUTOLOAD:=$(call AutoProbe,bnxt_en)
+endef
+
+define KernelPackage/bnxt-en/description
+  Supports Broadcom NetXtreme-C/E based Ethernet NICs including:
+  * BCM573xx
+  * BCM574xx
+endef
+
+$(eval $(call KernelPackage,bnxt-en))
+
 define KernelPackage/be2net
   SUBMENU:=$(NETWORK_DEVICES_MENU)
   TITLE:=Broadcom Emulex OneConnect 10Gbps NIC
@@ -1765,7 +1804,7 @@ $(eval $(call KernelPackage,sfp))
 define KernelPackage/pcs-xpcs
   SUBMENU:=$(NETWORK_DEVICES_MENU)
   TITLE:=Synopsis DesignWare PCS driver
-  DEPENDS:=@(TARGET_x86_64||TARGET_armsr_armv8) +kmod-phylink
+  DEPENDS:=@(TARGET_x86_64||TARGET_armsr) +kmod-phylink
   KCONFIG:=CONFIG_PCS_XPCS
   FILES:=$(LINUX_DIR)/drivers/net/pcs/pcs_xpcs.ko
   AUTOLOAD:=$(call AutoLoad,20,pcs_xpcs)
@@ -1777,7 +1816,7 @@ $(eval $(call KernelPackage,pcs-xpcs))
 define KernelPackage/stmmac-core
   SUBMENU:=$(NETWORK_DEVICES_MENU)
   TITLE:=Synopsis Ethernet Controller core (NXP,STMMicro,others)
-  DEPENDS:=@TARGET_x86_64||TARGET_armsr_armv8 +kmod-pcs-xpcs +kmod-ptp
+  DEPENDS:=@TARGET_x86_64||TARGET_armsr +kmod-pcs-xpcs +kmod-ptp
   KCONFIG:=CONFIG_STMMAC_ETH \
     CONFIG_STMMAC_SELFTESTS=n \
     CONFIG_STMMAC_PLATFORM \
@@ -1961,7 +2000,7 @@ $(eval $(call KernelPackage,lan743x))
 define KernelPackage/amazon-ena
   SUBMENU:=$(NETWORK_DEVICES_MENU)
   TITLE:=Elastic Network Adapter (for Amazon AWS)
-  DEPENDS:=@TARGET_x86_64||TARGET_armsr_armv8
+  DEPENDS:=@TARGET_x86_64||TARGET_armsr
   KCONFIG:=CONFIG_ENA_ETHERNET
   FILES:=$(LINUX_DIR)/drivers/net/ethernet/amazon/ena/ena.ko
   AUTOLOAD:=$(call AutoLoad,12,ena)
