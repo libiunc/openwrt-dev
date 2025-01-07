@@ -542,7 +542,6 @@ define Device/extreme-networks_ws-ap3915i
 	DEVICE_MODEL := WS-AP3915i
 	IMAGE_SIZE := 30080k
 	SOC := qcom-ipq4029
-	BLOCKSIZE := 128k
 	IMAGE/sysupgrade.bin := append-kernel | append-rootfs | pad-rootfs | check-size | append-metadata
 endef
 TARGET_DEVICES += extreme-networks_ws-ap3915i
@@ -1146,7 +1145,7 @@ define Device/teltonika_rutx50
 	PAGESIZE := 2048
 	FILESYSTEMS := squashfs
 	IMAGE/factory.ubi := append-ubi
-	DEVICE_PACKAGES := ipq-wifi-teltonika_rutx kmod-usb-net-qmi-wwan kmod-usb-serial-option uqmi
+	DEVICE_PACKAGES := kmod-usb-net-qmi-wwan kmod-usb-serial-option uqmi
 endef
 TARGET_DEVICES += teltonika_rutx50
 
