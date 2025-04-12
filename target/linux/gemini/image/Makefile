@@ -158,7 +158,7 @@ define Device/dlink_dir-685
 	DEVICE_MODEL := DIR-685 Xtreme N Storage Router
 	DEVICE_DTS := gemini-dlink-dir-685
 	DEVICE_PACKAGES := $(GEMINI_NAS_PACKAGES) \
-			kmod-rt2800-pci
+			kmod-dsa-rtl8366rb
 	IMAGES := factory.bin sysupgrade.bin
 	# Pad to 128k erase blocks with 160 bytes WRGG header
 	IMAGE/factory.bin := append-kernel | pad-offset 128k 160 | append-rootfs | dir685-pad-rootfs | dir685-image
@@ -170,7 +170,7 @@ define Device/dlink_dns-313
 	DEVICE_VENDOR := D-Link
 	DEVICE_MODEL := DNS-313 1-Bay Network Storage Enclosure
 	DEVICE_DTS := gemini-dlink-dns-313
-	DEVICE_PACKAGES := $(GEMINI_NAS_PACKAGES)
+	DEVICE_PACKAGES := $(GEMINI_NAS_PACKAGES) usbgadget-acm
 	BLOCKSIZE := 1k
 	FILESYSTEMS := ext4
 	IMAGES := factory.bin.gz

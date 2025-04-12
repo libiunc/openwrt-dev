@@ -5,9 +5,9 @@
 include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
 
-PKG_VERSION:=2024.10
+PKG_VERSION:=2025.01
 PKG_RELEASE:=1
-PKG_HASH:=b28daf4ac17e43156363078bf510297584137f6df50fced9b12df34f61a92fb0
+PKG_HASH:=cdef7d507c93f1bbd9f015ea9bc21fa074268481405501945abc6f854d5b686f
 
 PKG_MAINTAINER:=Sarah Maedel <openwrt@tbspace.de>
 
@@ -138,7 +138,7 @@ endef
 
 define U-Boot/rock-pi-4-rk3399
   $(U-Boot/rk3399/Default)
-  NAME:=Rock Pi 4
+  NAME:=ROCK Pi 4
   BUILD_DEVICES:= \
     radxa_rock-pi-4a
 endef
@@ -247,8 +247,10 @@ endef
 
 define U-Boot/rk3588/Default
   BUILD_SUBTARGET:=armv8
-  DEPENDS:=+PACKAGE_u-boot-$(1):trusted-firmware-a-rk3588
-  ATF:=rk3588_bl31_v1.45.elf
+  DEPENDS:= \
+	+PACKAGE_u-boot-$(1):trusted-firmware-a-rk3588 \
+	+PACKAGE_u-boot-$(1):trusted-firmware-a-rk3588-tpl
+  ATF:=rk3588_bl31.elf
   TPL:=rk3588_ddr_lp4_2112MHz_lp5_2400MHz_v1.16.bin
 endef
 
