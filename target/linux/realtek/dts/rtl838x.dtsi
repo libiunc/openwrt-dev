@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later OR MIT
 
 #include <dt-bindings/clock/rtl83xx-clk.h>
+#include <dt-bindings/gpio/gpio.h>
 
 /dts-v1/;
 
@@ -120,6 +121,7 @@
 	aliases {
 		serial0 = &uart0;
 		serial1 = &uart1;
+		mdio-gpio1 = &mdio_gpio;
 	};
 
 	chosen {
@@ -132,6 +134,22 @@
 		#address-cells = <0>;
 		#interrupt-cells = <1>;
 		interrupt-controller;
+	};
+
+	/*
+	 * Provided for devices with RTL838xM SoC with revision A silicon.
+	 * Newer SoCs can use the &mdio_aux bus instead.
+	 */
+	mdio_gpio: mdio {
+		compatible = "virtual,mdio-gpio";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		gpios = <&gpio0 2 GPIO_ACTIVE_HIGH>,
+			<&gpio0 3 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&mdio_aux_gpio>;
+
+		status = "disabled";
 	};
 
 	soc: soc {
@@ -246,6 +264,11 @@
 			pinctrl-names = "default";
 			pinctrl-0 = <&mdio_aux_mdx>, <&aux_mode_mdio>;
 		};
+
+		soc_thermal: thermal {
+			compatible = "realtek,rtl8380-thermal";
+			#thermal-sensor-cells = <0>;
+		};
 	};
 
 	pinmux@1b000144 {
@@ -345,5 +368,21 @@
 
 		interrupt-parent = <&intc>;
 		interrupts = <20 2>;
+	};
+
+	thermal_zones: thermal-zones {
+		cpu-thermal {
+			polling-delay-passive = <1000>;
+			polling-delay = <1000>;
+			coefficients = <1000 0>;
+			thermal-sensors = <&soc_thermal>;
+			trips {
+				cpu-crit {
+					temperature = <105000>;
+					hysteresis = <2000>;
+					type = "critical";
+				};
+			};
+		};
 	};
 };
