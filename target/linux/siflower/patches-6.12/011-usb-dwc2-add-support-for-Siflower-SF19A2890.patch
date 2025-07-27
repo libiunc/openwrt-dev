@@ -25,9 +25,9 @@ Signed-off-by: Chuanhong Guo <gch981213@gmail.com>
  {
  	struct dwc2_core_params *p = &hsotg->params;
 @@ -294,6 +302,8 @@ const struct of_device_id dwc2_of_match_
- 	  .data = dwc2_set_amlogic_a1_params },
- 	{ .compatible = "amcc,dwc-otg", .data = dwc2_set_amcc_params },
  	{ .compatible = "apm,apm82181-dwc-otg", .data = dwc2_set_amcc_params },
+ 	{ .compatible = "sophgo,cv1800-usb",
+	  .data = dwc2_set_cv1800_params },
 +	{ .compatible = "siflower,sf19a2890-usb",
 +	  .data = dwc2_set_sf19a2890_params },
  	{ .compatible = "st,stm32f4x9-fsotg",

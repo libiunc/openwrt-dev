@@ -28,10 +28,8 @@ Subject: [PATCH 08/20] pinctrl: add driver for siflower sf19a2890
  	depends on OF
 --- a/drivers/pinctrl/Makefile
 +++ b/drivers/pinctrl/Makefile
-@@ -43,6 +43,7 @@ obj-$(CONFIG_PINCTRL_PIC32)	+= pinctrl-p
- obj-$(CONFIG_PINCTRL_PISTACHIO)	+= pinctrl-pistachio.o
- obj-$(CONFIG_PINCTRL_RK805)	+= pinctrl-rk805.o
- obj-$(CONFIG_PINCTRL_ROCKCHIP)	+= pinctrl-rockchip.o
+@@ -49,5 +49,6@@ obj-$(CONFIG_PINCTRL_ROCKCHIP)	+= pinctrl-rockchip.o
+ obj-$(CONFIG_PINCTRL_SCMI)	+= pinctrl-scmi.o
 +obj-$(CONFIG_PINCTRL_SF19A2890)	+= pinctrl-sf19a2890.o
  obj-$(CONFIG_PINCTRL_SINGLE)	+= pinctrl-single.o
  obj-$(CONFIG_PINCTRL_ST) 	+= pinctrl-st.o
