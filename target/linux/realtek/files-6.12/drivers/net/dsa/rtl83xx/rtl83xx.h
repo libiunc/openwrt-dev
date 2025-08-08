@@ -175,7 +175,7 @@ void rtl839x_print_matrix(void);
 
 /* RTL930x-specific */
 u32 rtl930x_hash(struct rtl838x_switch_priv *priv, u64 seed);
-irqreturn_t rtl930x_switch_irq(int irq, void *dev_id);
+irqreturn_t rtldsa_930x_switch_irq(int irq, void *dev_id);
 irqreturn_t rtl839x_switch_irq(int irq, void *dev_id);
 void rtl930x_vlan_profile_dump(int index);
 int rtl9300_sds_power(int mac, int val);
@@ -193,9 +193,6 @@ int rtl83xx_lag_add(struct dsa_switch *ds, int group, int port, struct netdev_la
 int rtl83xx_lag_del(struct dsa_switch *ds, int group, int port);
 
 /* phy functions that will need to be moved to the future mdio driver */
-
-int rtl839x_read_mmd_phy(u32 port, u32 devnum, u32 regnum, u32 *val);
-int rtl839x_write_mmd_phy(u32 port, u32 devnum, u32 regnum, u32 val);
 
 int rtl930x_read_mmd_phy(u32 port, u32 devnum, u32 regnum, u32 *val);
 int rtl930x_write_mmd_phy(u32 port, u32 devnum, u32 regnum, u32 val);
