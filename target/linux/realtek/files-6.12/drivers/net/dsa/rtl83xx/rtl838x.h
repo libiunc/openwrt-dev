@@ -25,8 +25,6 @@
 #define RTL838X_SDS_MODE_SEL			(0x0028)
 #define RTL838X_SDS_CFG_REG			(0x0034)
 #define RTL838X_INT_MODE_CTRL			(0x005c)
-#define RTL838X_CHIP_INFO			(0x00d8)
-#define RTL839X_CHIP_INFO			(0x0ff4)
 #define RTL838X_PORT_ISO_CTRL(port)		(0x4100 + ((port) << 2))
 #define RTL839X_PORT_ISO_CTRL(port)		(0x1400 + ((port) << 3))
 
@@ -34,6 +32,7 @@
 #define RTL838X_STAT_PORT_STD_MIB		(0x1200)
 #define RTL839X_STAT_PORT_STD_MIB		(0xC000)
 #define RTL930X_STAT_PORT_MIB_CNTR		(0x0664)
+#define RTL930X_STAT_PORT_PRVTE_CNTR		(0x2364)
 #define RTL838X_STAT_RST			(0x3100)
 #define RTL839X_STAT_RST			(0xF504)
 #define RTL930X_STAT_RST			(0x3240)
@@ -124,24 +123,6 @@
 #define RTL839X_MAC_LINK_STS			(0x0390)
 #define RTL930X_MAC_LINK_STS			(0xCB10)
 #define RTL931X_MAC_LINK_STS			(0x0EC0)
-#define RTL838X_MAC_LINK_SPD_STS(p)		(0xa190 + (((p >> 4) << 2)))
-#define RTL839X_MAC_LINK_SPD_STS(p)		(0x03a0 + (((p >> 4) << 2)))
-#define RTL930X_MAC_LINK_SPD_STS(p)		(0xCB18 + (((p >> 3) << 2)))
-#define RTL931X_MAC_LINK_SPD_STS		(0x0ED0)
-#define RTL838X_MAC_LINK_DUP_STS		(0xa19c)
-#define RTL839X_MAC_LINK_DUP_STS		(0x03b0)
-#define RTL930X_MAC_LINK_DUP_STS		(0xCB28)
-#define RTL931X_MAC_LINK_DUP_STS		(0x0EF0)
-#define RTL838X_MAC_TX_PAUSE_STS		(0xa1a0)
-#define RTL839X_MAC_TX_PAUSE_STS		(0x03b8)
-#define RTL930X_MAC_TX_PAUSE_STS		(0xCB2C)
-#define RTL931X_MAC_TX_PAUSE_STS		(0x0EF8)
-#define RTL838X_MAC_RX_PAUSE_STS		(0xa1a4)
-#define RTL839X_MAC_RX_PAUSE_STS		(0x03c0)
-#define RTL930X_MAC_RX_PAUSE_STS		(0xCB30)
-#define RTL931X_MAC_RX_PAUSE_STS		(0x0F00)
-#define RTL930X_MAC_LINK_MEDIA_STS		(0xCB14)
-#define RTL931X_MAC_LINK_MEDIA_STS		(0x0EC8)
 
 /* MAC link state bits */
 #define RTL_SPEED_10				0
@@ -247,6 +228,8 @@
 #define RTL838X_L2_LRN_CONSTRT_EN		(0x3368)
 #define RTL838X_L2_PORT_LRN_CONSTRT		(0x32A0)
 #define RTL839X_L2_PORT_LRN_CONSTRT		(0x3914)
+#define RTL930X_L2_LRN_PORT_CONSTRT_CTRL	(0x90A4)
+#define RTL931X_L2_LRN_PORT_CONSTRT_CTRL	(0xC96C)
 
 #define RTL838X_L2_PORT_NEW_SALRN(p)		(0x328c + (((p >> 4) << 2)))
 #define RTL839X_L2_PORT_NEW_SALRN(p)		(0x38F0 + (((p >> 4) << 2)))
@@ -277,6 +260,7 @@
 #define MV_ACT_COPY2CPU				3
 
 #define RTL930X_ST_CTRL				(0x8798)
+#define RTL931x_ST_CTRL				(0x8000)
 
 #define RTL930X_L2_PORT_SABLK_CTRL		(0x905c)
 #define RTL930X_L2_PORT_DABLK_CTRL		(0x9060)
@@ -469,6 +453,7 @@ typedef enum {
 #define RTL931X_RMA_LLDP_CTRL			(0x8918)
 
 #define RTL930X_RMA_EAPOL_CTRL			(0x9F08)
+#define RTL930X_SPCL_TRAP_PORT_CTRL		(0xA1A0)
 #define RTL931X_RMA_EAPOL_CTRL			(0x8930)
 #define RTL931X_TRAP_ARP_GRAT_PORT_ACT		(0x8C04)
 
@@ -638,6 +623,51 @@ enum pbvlan_mode {
 	PBVLAN_MODE_ALL_PKT,
 };
 
+struct rtldsa_counter {
+	uint64_t val;
+	uint32_t last;
+};
+
+struct rtldsa_counter_state {
+	spinlock_t lock;
+	ktime_t last_update;
+
+	struct rtldsa_counter symbol_errors;
+
+	struct rtldsa_counter if_in_octets;
+	struct rtldsa_counter if_out_octets;
+	struct rtldsa_counter if_in_ucast_pkts;
+	struct rtldsa_counter if_in_mcast_pkts;
+	struct rtldsa_counter if_in_bcast_pkts;
+	struct rtldsa_counter if_out_ucast_pkts;
+	struct rtldsa_counter if_out_mcast_pkts;
+	struct rtldsa_counter if_out_bcast_pkts;
+	struct rtldsa_counter if_out_discards;
+	struct rtldsa_counter single_collisions;
+	struct rtldsa_counter multiple_collisions;
+	struct rtldsa_counter deferred_transmissions;
+	struct rtldsa_counter late_collisions;
+	struct rtldsa_counter excessive_collisions;
+	struct rtldsa_counter crc_align_errors;
+	struct rtldsa_counter rx_pkts_over_max_octets;
+
+	struct rtldsa_counter unsupported_opcodes;
+
+	struct rtldsa_counter rx_undersize_pkts;
+	struct rtldsa_counter rx_oversize_pkts;
+	struct rtldsa_counter rx_fragments;
+	struct rtldsa_counter rx_jabbers;
+
+	struct rtldsa_counter tx_pkts[ETHTOOL_RMON_HIST_MAX];
+	struct rtldsa_counter rx_pkts[ETHTOOL_RMON_HIST_MAX];
+
+	struct rtldsa_counter drop_events;
+	struct rtldsa_counter collisions;
+
+	struct rtldsa_counter rx_pause_frames;
+	struct rtldsa_counter tx_pause_frames;
+};
+
 struct rtl838x_port {
 	bool enable;
 	u64 pm;
@@ -650,18 +680,13 @@ struct rtl838x_port {
 	int sds_num;
 	int led_set;
 	int leds_on_this_port;
+	struct rtldsa_counter_state counters;
 	const struct dsa_port *dp;
-};
-
-struct rtl838x_pcs {
-	struct phylink_pcs pcs;
-	struct rtl838x_switch_priv *priv;
-	int port;
 };
 
 struct rtl838x_vlan_info {
 	u64 untagged_ports;
-	u64 tagged_ports;
+	u64 member_ports;
 	u8 profile_id;
 	bool hash_mc_fid;
 	bool hash_uc_fid;
@@ -981,6 +1006,7 @@ struct rtl838x_reg {
 	int stat_port_rst;
 	int stat_rst;
 	int stat_port_std_mib;
+	int stat_port_prv_mib;
 	int (*port_iso_ctrl)(int p);
 	void (*traffic_enable)(int source, int dest);
 	void (*traffic_disable)(int source, int dest);
@@ -1023,11 +1049,6 @@ struct rtl838x_reg {
 	int mir_ctrl;
 	int mir_dpm;
 	int mir_spm;
-	int mac_link_sts;
-	int mac_link_dup_sts;
-	int  (*mac_link_spd_sts)(int port);
-	int mac_rx_pause_sts;
-	int mac_tx_pause_sts;
 	u64 (*read_l2_entry_using_hash)(u32 hash, u32 position, struct rtl838x_l2_entry *e);
 	void (*write_l2_entry_using_hash)(u32 hash, u32 pos, struct rtl838x_l2_entry *e);
 	u64 (*read_cam)(int idx, struct rtl838x_l2_entry *e);
@@ -1076,7 +1097,7 @@ struct rtl838x_switch_priv {
 	u16 family_id;
 	char version;
 	struct rtl838x_port ports[57];
-	struct rtl838x_pcs pcs[57];
+	struct phylink_pcs *pcs[57];
 	struct mutex reg_mutex;		/* Mutex for individual register manipulations */
 	struct mutex pie_mutex;		/* Mutex for Packet Inspection Engine */
 	int link_state_irq;
@@ -1097,6 +1118,7 @@ struct rtl838x_switch_priv {
 	u32 lag_primary[MAX_LAGS];
 	u32 is_lagmember[57];
 	u64 lagmembers;
+	struct workqueue_struct *wq;
 	struct notifier_block nb;  /* TODO: change to different name */
 	struct notifier_block ne_nb;
 	struct notifier_block fib_nb;
@@ -1114,6 +1136,7 @@ struct rtl838x_switch_priv {
 	struct rtl838x_l3_intf *interfaces[MAX_INTERFACES];
 	u16 intf_mtus[MAX_INTF_MTUS];
 	int intf_mtu_count[MAX_INTF_MTUS];
+	struct delayed_work counters_work;
 };
 
 void rtl838x_dbgfs_init(struct rtl838x_switch_priv *priv);

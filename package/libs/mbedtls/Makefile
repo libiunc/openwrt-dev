@@ -53,6 +53,7 @@ MBEDTLS_BUILD_OPTS_CIPHERS= \
   CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED \
   CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA_ENABLED \
   CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_RSA_ENABLED \
+  CONFIG_MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED \
   CONFIG_MBEDTLS_NIST_KW_C \
   CONFIG_MBEDTLS_RIPEMD160_C \
   CONFIG_MBEDTLS_RSA_NO_CRT \
@@ -137,14 +138,14 @@ CMAKE_OPTIONS += \
 	-DENABLE_TESTING:Bool=OFF \
 	-DENABLE_PROGRAMS:Bool=ON
 
-define Build/Prepare
-       $(call Build/Prepare/Default)
+define Build/Configure
+	$(call Build/Configure/Default)
 
-       $(if $(strip $(foreach opt,$(MBEDTLS_BUILD_OPTS),$($(opt)))),
-	 $(foreach opt,$(MBEDTLS_BUILD_OPTS),
-	 $(PKG_BUILD_DIR)/scripts/config.py \
-	 -f $(PKG_BUILD_DIR)/include/mbedtls/mbedtls_config.h \
-	 $(if $($(opt)),set,unset) $(patsubst CONFIG_%,%,$(opt))),)
+	$(if $(strip $(foreach opt,$(MBEDTLS_BUILD_OPTS),$($(opt)))),
+		$(foreach opt,$(MBEDTLS_BUILD_OPTS),
+			$(PKG_BUILD_DIR)/scripts/config.py \
+			-f $(PKG_BUILD_DIR)/include/mbedtls/mbedtls_config.h \
+			$(if $($(opt)),set,unset) $(patsubst CONFIG_%,%,$(opt))),)
 endef
 
 define Build/InstallDev
