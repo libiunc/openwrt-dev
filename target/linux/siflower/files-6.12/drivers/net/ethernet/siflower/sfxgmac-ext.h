@@ -7,6 +7,7 @@
 #include <linux/etherdevice.h>
 #include <linux/ethtool.h>
 #include <linux/phylink.h>
+#include <linux/skbuff.h>
 
 #define SF_GMAC_DUNMMY_ID 0xfa
 
@@ -27,5 +28,9 @@
 struct gmac_common {
 	GMAC_COMMON_STRUCT;
 };
+
+struct xgmac_dma_priv;
+
+extern netdev_tx_t xgmac_dma_xmit(struct sk_buff *skb, struct xgmac_dma_priv *priv);
 
 #endif

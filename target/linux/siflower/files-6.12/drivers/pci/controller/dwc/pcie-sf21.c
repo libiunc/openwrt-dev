@@ -186,7 +186,7 @@ static u64 sf_pcie_cpu_addr_fixup(struct dw_pcie *pci, u64 cpu_addr)
 	return cpu_addr - pp->cfg0_base;
 }
 
-static int sf_pcie_host_init(struct dw_pcie_rp *pp)
+static void sf_pcie_host_init(struct dw_pcie_rp *pp)
 {
 	struct dw_pcie *pci = to_dw_pcie_from_pp(pp);
 	struct sf_pcie *sf_pcie = to_sf_pcie(pci);
@@ -194,20 +194,17 @@ static int sf_pcie_host_init(struct dw_pcie_rp *pp)
 
 	ret = sf_pcie_clk_enable(sf_pcie);
 	if (ret)
-		return dev_err_probe(sf_pcie->pci.dev, ret,
-				     "failed to enable pcie clocks.\n");
+		dev_err_probe(sf_pcie->pci.dev, ret, "failed to enable pcie clocks.\n");
 
 	sf_pcie_set_reset(sf_pcie, true);
 
 	ret = regmap_field_write(sf_pcie->pciesys_reg[DEVICE_TYPE], PCIE_DEVTYPE_RC);
 	if (ret)
-		return ret;
 
 	gpiod_set_value_cansleep(sf_pcie->reset_gpio, 1);
 
 	ret = sf_pcie_phy_enable(sf_pcie);
 	if (ret)
-		return ret;
 
 	/* TODO: release power-down */
 	msleep(100);
@@ -218,10 +215,9 @@ static int sf_pcie_host_init(struct dw_pcie_rp *pp)
 	sf_pcie_enable_part_lanes_rxei_exit(sf_pcie);
 
 	gpiod_set_value_cansleep(sf_pcie->reset_gpio, 0);
-	return 0;
 }
 
-void sf_pcie_host_deinit(struct dw_pcie_rp *pp) {
+static void sf_pcie_host_deinit(struct dw_pcie_rp *pp) {
 	struct dw_pcie *pci = to_dw_pcie_from_pp(pp);
 	struct sf_pcie *sf_pcie = to_sf_pcie(pci);
 
@@ -235,8 +231,8 @@ void sf_pcie_host_deinit(struct dw_pcie_rp *pp) {
 }
 
 static const struct dw_pcie_host_ops sf_pcie_host_ops = {
-	.host_init = sf_pcie_host_init,
-	.host_deinit = sf_pcie_host_deinit,
+	.post_init = sf_pcie_host_init,
+	.deinit = sf_pcie_host_deinit,
 };
 
 static int sf_pcie_start_link(struct dw_pcie *pci)
@@ -332,12 +328,11 @@ static int sf_pcie_probe(struct platform_device *pdev)
 	return 0;
 }
 
-static int sf_pcie_remove(struct platform_device *pdev)
+static void sf_pcie_remove(struct platform_device *pdev)
 {
 	struct sf_pcie *pcie = platform_get_drvdata(pdev);
 
 	dw_pcie_host_deinit(&pcie->pci.pp);
-	return 0;
 
 }
 
