@@ -2,6 +2,7 @@
 #include <linux/kernel.h>
 #include <linux/interrupt.h>
 #include <linux/etherdevice.h>
+#include <linux/platform_device.h>
 #include <linux/of_mdio.h>
 #include <linux/of_net.h>
 #include <linux/of_platform.h>
@@ -9,9 +10,6 @@
 #include <linux/if.h>
 #include <linux/if_vlan.h>
 #include <linux/crc32.h>
-#include <linux/platform_device.h>
-#include <linux/phylink.h>
-#include <linux/reset.h>
 
 #include "dma.h"
 #include "eth.h"
@@ -957,39 +955,39 @@ static int xgmac_ethtool_get_link_ksettings(struct net_device *dev,
 	return phylink_ethtool_ksettings_get(priv->phylink, cmd);
 }
 
-static int xgmac_ethtool_get_eee(struct net_device *dev, struct ethtool_keee *eee)
+static int xgmac_ethtool_get_eee(struct net_device *dev, struct ethtool_keee *e)
 {
-    struct xgmac_priv *priv = netdev_priv(dev);
-    int ret;
+	struct xgmac_priv *priv = netdev_priv(dev);
+	int ret;
 
-    ret = phylink_ethtool_get_eee(priv->phylink, eee);
-    if (ret)
-        return ret;
+	ret = phylink_ethtool_get_eee(priv->phylink, e);
+	if (ret)
+		return ret;
 
-    eee->tx_lpi_enabled = priv->tx_lpi_enabled;
-    eee->tx_lpi_timer = reg_read(priv, XGMAC_LPI_AUTO_EN);
+	e->tx_lpi_enabled = priv->tx_lpi_enabled;
+	e->tx_lpi_timer = reg_read(priv, XGMAC_LPI_AUTO_EN);
 
-    return 0;
+	return 0;
 }
 
-static int xgmac_ethtool_set_eee(struct net_device *dev, struct ethtool_keee *eee)
+static int xgmac_ethtool_set_eee(struct net_device *dev, struct ethtool_keee *e)
 {
-    struct xgmac_priv *priv = netdev_priv(dev);
-    int ret;
+	struct xgmac_priv *priv = netdev_priv(dev);
+	int ret;
 
-    if (eee->tx_lpi_timer > XGMAC_LPI_AUTO_EN_MAX)
-        return -EINVAL;
+	if (e->tx_lpi_timer > XGMAC_LPI_AUTO_EN_MAX)
+		return -EINVAL;
 
-    ret = phylink_ethtool_set_eee(priv->phylink, eee);
-    if (ret)
-        return ret;
+	ret = phylink_ethtool_set_eee(priv->phylink, e);
+	if (ret)
+		return ret;
 
-    priv->tx_lpi_enabled = eee->tx_lpi_enabled;
-    xgmac_toggle_tx_lpi(priv);
+	priv->tx_lpi_enabled = e->tx_lpi_enabled;
+	xgmac_toggle_tx_lpi(priv);
 
-    reg_write(priv, XGMAC_LPI_AUTO_EN, eee->tx_lpi_timer);
+	reg_write(priv, XGMAC_LPI_AUTO_EN, e->tx_lpi_timer);
 
-    return 0;
+	return 0;
 }
 
 static int xgmac_ethtool_set_link_ksettings(struct net_device *dev,
@@ -1201,6 +1199,7 @@ static int xgmac_probe(struct platform_device *pdev)
 			 NETIF_F_SG | NETIF_F_HW_TC |
 			 NETIF_F_IP_CSUM | NETIF_F_IPV6_CSUM | NETIF_F_TSO |
 			 NETIF_F_TSO6;
+	ndev->lltx = true;
 	ndev->hw_features = (ndev->features & ~NETIF_F_RXHASH) |
 			    NETIF_F_LOOPBACK | NETIF_F_RXFCS | NETIF_F_RXALL |
 			    NETIF_F_HW_L2FW_DOFFLOAD;

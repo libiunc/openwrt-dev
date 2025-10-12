@@ -1,12 +1,9 @@
 #define pr_fmt(fmt)	"xpcs: " fmt
 
-#include <linux/module.h>
-#include <linux/platform_device.h>
-#include <linux/io.h>
-#include <linux/interrupt.h> 
 #include <linux/clk.h>
 #include <linux/mfd/syscon.h>
 #include <linux/phylink.h>
+#include <linux/platform_device.h>
 #include <linux/of_platform.h>
 #include <linux/seq_file.h>
 #include <linux/proc_fs.h>
@@ -599,9 +596,6 @@ static int xpcs_probe(struct platform_device *pdev)
 static void xpcs_remove(struct platform_device *pdev)
 {
 	struct xpcs_priv *priv = platform_get_drvdata(pdev);
-
-	if (!priv)
-		return;
 
 	clk_bulk_disable_unprepare(XPCS_NUM_CLKS, priv->clks);
 	regmap_clear_bits(priv->ethsys, ETHSYS_RST, BIT(5 + priv->id));
