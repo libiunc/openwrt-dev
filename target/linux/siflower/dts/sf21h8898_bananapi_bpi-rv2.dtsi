@@ -164,7 +164,7 @@
 };
 
 &pcie_phy {
-	status = "okay";
+	status = "disabled";
 };
 
 /*
@@ -176,7 +176,7 @@
  */
 &pcie0 {
 	reset-gpios = <&gpio 19 GPIO_ACTIVE_LOW>;
-	status = "okay";
+	status = "disabled";
 };
 
 /*
@@ -186,7 +186,7 @@
  */
 &pcie1 {
 	reset-gpios = <&gpio 9 GPIO_ACTIVE_LOW>;
-	status = "okay";
+	status = "disabled";
 };
 
 &usb_phy {
