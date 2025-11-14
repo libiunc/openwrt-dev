@@ -1274,7 +1274,7 @@ drop_kfree:
 	return NETDEV_TX_OK;
 }
 
-netdev_tx_t xgmac_dma_xmit_fast(struct sk_buff *skb, struct net_device *dev)
+static netdev_tx_t xgmac_dma_xmit_fast(struct sk_buff *skb, struct net_device *dev)
 {
 	struct gmac_common *priv = netdev_priv(dev);
 	struct xgmac_skb_cb *cb = XGMAC_SKB_CB(skb);
