@@ -29,6 +29,4 @@ struct gmac_common {
 	GMAC_COMMON_STRUCT;
 };
 
-struct xgmac_dma_priv;
-
 #endif
