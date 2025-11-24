@@ -113,9 +113,9 @@ ifeq ($(DUMP),)
     ABIV_$(1):=$(call FormatABISuffix,$(1),$(ABI_VERSION))
     PDIR_$(1):=$(call FeedPackageDir,$(1))
 ifeq ($(CONFIG_USE_APK),)
-    PACK_$(1):=$$(PDIR_$(1))/$(1)$$(ABIV_$(1))_$(VERSION)_$(PKGARCH).ipk
+    PACK_$(1):=$$(PDIR_$(1))/$(1)$$(ABIV_$(1))_$(subst -rc,_rc,$(VERSION))_$(PKGARCH).ipk
 else
-    PACK_$(1):=$$(PDIR_$(1))/$(1)$$(ABIV_$(1))-$(VERSION).apk
+    PACK_$(1):=$$(PDIR_$(1))/$(1)$$(ABIV_$(1))-$(subst -rc,_rc,$(VERSION)).apk
 endif
     IDIR_$(1):=$(PKG_BUILD_DIR)/ipkg-$(PKGARCH)/$(1)
     ADIR_$(1):=$(PKG_BUILD_DIR)/apk-$(PKGARCH)/$(1)
@@ -386,7 +386,7 @@ else
 
 	$(FAKEROOT) $(STAGING_DIR_HOST)/bin/apk mkpkg \
 	  --info "name:$(1)$$(ABIV_$(1))" \
-	  --info "version:$(VERSION)" \
+	  --info "version:$(subst -rc,_rc,$(VERSION))" \
 	  $$(if $$(ABIV_$(1)),--info "tags:openwrt:abiversion=$$(ABIV_$(1))") \
 	  --info "description:$$(call description_escape,$$(strip $$(Package/$(1)/description)))" \
 	  $(if $(findstring all,$(PKGARCH)),--info "arch:noarch",--info "arch:$(PKGARCH)") \
@@ -406,7 +406,7 @@ else
 		$$(prov) )" \
 	  $(if $(DEFAULT_VARIANT),--info "provider-priority:100",$(if $(PROVIDES),--info "provider-priority:1")) \
 	  $$(APK_SCRIPTS_$(1)) \
-	  --info "depends:$$(foreach depends,$$(subst $$(comma),$$(space),$$(subst $$(space),,$$(subst $$(paren_right),,$$(subst $$(paren_left),,$$(Package/$(1)/DEPENDS))))),$$(depends))" \
+	  --info "depends:$$(foreach depends,$$(subst $$(comma),$$(space),$$(subst $$(space),,$$(subst $$(paren_right),,$$(subst $$(paren_left),,$$(subst -rc,_rc,$(Package/$(1)/DEPENDS)))))),$$(depends))" \
 	  --files "$$(IDIR_$(1))" \
 	  --output "$$(PACK_$(1))"
 endif

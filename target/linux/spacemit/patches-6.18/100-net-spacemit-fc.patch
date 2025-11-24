@@ -1,0 +1,34 @@
+From cc920aad0159357153aa52e1153387cc3a0789fd Mon Sep 17 00:00:00 2001
+From: Vivian Wang <wangruikang@iscas.ac.cn>
+Date: Fri, 31 Oct 2025 15:41:33 +0800
+Subject: [PATCH] net: spacemit: Check netif_running() in emac_set_pauseparam()
+
+Currently, emac_set_pauseparam() will oops if userspace calls it while
+the interface is not up, because phydev is NULL, but it is still
+accessed in emac_set_fc() and emac_set_fc_autoneg().
+
+Check for netif_running(dev) in emac_set_pauseparam() before proceeding.
+
+Fixes: bfec6d7f2001 ("net: spacemit: Add K1 Ethernet MAC")
+Signed-off-by: Vivian Wang <wangruikang@iscas.ac.cn>
+---
+ drivers/net/ethernet/spacemit/k1_emac.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/drivers/net/ethernet/spacemit/k1_emac.c b/drivers/net/ethernet/spacemit/k1_emac.c
+index e1c5faff3b71..220eb5ce7583 100644
+--- a/drivers/net/ethernet/spacemit/k1_emac.c
++++ b/drivers/net/ethernet/spacemit/k1_emac.c
+@@ -1441,6 +1441,9 @@ static int emac_set_pauseparam(struct net_device *dev,
+ 	struct emac_priv *priv = netdev_priv(dev);
+ 	u8 fc = 0;
+ 
++	if (!netif_running(dev))
++		return -ENETDOWN;
++
+ 	priv->flow_control_autoneg = pause->autoneg;
+ 
+ 	if (pause->autoneg) {
+-- 
+2.51.0
+

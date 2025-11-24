@@ -1,0 +1,13 @@
+diff --git a/crypto/Kconfig b/crypto/Kconfig
+index a04595f9d0ca..d1d17d0b084c 100644
+--- a/crypto/Kconfig
++++ b/crypto/Kconfig
+@@ -55,7 +55,7 @@ config CRYPTO_FIPS_VERSION
+ 	  By default the KERNELRELEASE value is used.
+ 
+ config CRYPTO_ALGAPI
+-	tristate
++	tristate "ALGAPI"
+ 	select CRYPTO_ALGAPI2
+ 	help
+ 	  This option provides the API for cryptographic algorithms.

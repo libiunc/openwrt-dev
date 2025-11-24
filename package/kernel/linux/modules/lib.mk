@@ -11,7 +11,7 @@ define KernelPackage/lib-crc-ccitt
   SUBMENU:=$(LIB_MENU)
   TITLE:=CRC-CCITT support
   KCONFIG:=CONFIG_CRC_CCITT
-  FILES:=$(LINUX_DIR)/lib/crc-ccitt.ko
+  FILES:=$(wildcard $(LINUX_DIR)/lib/crc/crc-ccitt.ko) $(wildcard $(LINUX_DIR)/lib/crc-ccitt.ko)
   AUTOLOAD:=$(call AutoProbe,crc-ccitt)
 endef
 

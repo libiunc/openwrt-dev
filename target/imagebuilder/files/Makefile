@@ -232,7 +232,7 @@ else
 	$(APK) add --arch $(ARCH_PACKAGES) --no-scripts $(BUILD_PACKAGES) \
         "base-files=$(BASE_FILES_VERSION)" \
         "libc=$(LIBC_VERSION)" \
-        "kernel=$(KERNEL_VERSION)"
+        "kernel=$(subst -rc,_rc,$(KERNEL_VERSION))"
 endif
 
 prepare_rootfs: FORCE

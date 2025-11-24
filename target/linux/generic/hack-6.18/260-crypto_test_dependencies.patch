@@ -1,0 +1,48 @@
+diff --git a/crypto/Kconfig b/crypto/Kconfig
+index a04595f9d0ca..99595de3b7d2 100644
+--- a/crypto/Kconfig
++++ b/crypto/Kconfig
+@@ -155,16 +155,19 @@ config CRYPTO_MANAGER
+ 	  This provides the support for instantiating templates such as
+ 	  cbc(aes), and the support for the crypto self-tests.
+ 
++config CRYPTO_MANAGER_DISABLE_TESTS
++	bool "CRYPTO_MANAGER_DISABLE_TESTS"
++
+ config CRYPTO_MANAGER2
+-	def_tristate CRYPTO_MANAGER || (CRYPTO_MANAGER!=n && CRYPTO_ALGAPI=y)
+-	select CRYPTO_ACOMP2
+-	select CRYPTO_AEAD2
+-	select CRYPTO_AKCIPHER2
+-	select CRYPTO_SIG2
+-	select CRYPTO_HASH2
+-	select CRYPTO_KPP2
+-	select CRYPTO_RNG2
+-	select CRYPTO_SKCIPHER2
++	def_tristate CRYPTO_MANAGER || (CRYPTO_MANAGER!=n && CRYPTO_ALGAPI=y && !CRYPTO_MANAGER_DISABLE_TESTS)
++	select CRYPTO_ACOMP2 if !CRYPTO_MANAGER_DISABLE_TESTS
++	select CRYPTO_AEAD2 if !CRYPTO_MANAGER_DISABLE_TESTS
++	select CRYPTO_AKCIPHER2 if !CRYPTO_MANAGER_DISABLE_TESTS
++	select CRYPTO_SIG2 if !CRYPTO_MANAGER_DISABLE_TESTS
++	select CRYPTO_HASH2 if !CRYPTO_MANAGER_DISABLE_TESTS
++	select CRYPTO_KPP2 if !CRYPTO_MANAGER_DISABLE_TESTS
++	select CRYPTO_RNG2 if !CRYPTO_MANAGER_DISABLE_TESTS
++	select CRYPTO_SKCIPHER2 if !CRYPTO_MANAGER_DISABLE_TESTS
+ 
+ config CRYPTO_USER
+ 	tristate "Userspace cryptographic algorithm configuration"
+diff --git a/crypto/algboss.c b/crypto/algboss.c
+index 846f586889ee..cddb5077bf4c 100644
+--- a/crypto/algboss.c
++++ b/crypto/algboss.c
+@@ -203,6 +203,10 @@ static int cryptomgr_schedule_test(struct crypto_alg *alg)
+ 	memcpy(param->alg, alg->cra_name, sizeof(param->alg));
+ 	param->type = alg->cra_flags;
+ 
++#ifdef CONFIG_CRYPTO_MANAGER_DISABLE_TESTS
++	param->type |= CRYPTO_ALG_TESTED;
++#endif
++
+ 	thread = kthread_run(cryptomgr_test, param, "cryptomgr_test");
+ 	if (IS_ERR(thread))
+ 		goto err_free_param;
