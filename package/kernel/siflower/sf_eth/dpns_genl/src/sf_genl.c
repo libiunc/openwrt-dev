@@ -307,7 +307,7 @@ static int sfgenl_msg_cmd(struct sk_buff *skb, struct genl_info *info)
 // NOTE: return < 0 will cause userspace recv() an error
 static int sf_nlmsg_recv(struct sk_buff *skb, struct genl_info *info)
 {
-        struct nlmsghdr *nlhdr = info->nlhdr;
+        const struct nlmsghdr *nlhdr = info->nlhdr;
         struct genlmsghdr *genlhdr = info->genlhdr;
         u8 cmd = genlhdr->cmd;
 
@@ -355,7 +355,7 @@ static struct genl_family sf_genl_family = {
         .n_ops          = ARRAY_SIZE(sf_genl_ops),
 };
 
-int sfgenl_self_msg_recv(struct genl_info *info, void *buf, size_t buflen)
+static int sfgenl_self_msg_recv(struct genl_info *info, void *buf, size_t buflen)
 {
         char reply[] = "ACK";
 

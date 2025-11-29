@@ -30,7 +30,7 @@ static u8 mpnum;
 static ur num_ports;
 static u16 vlan_rd_index;
 static u32 firstmac, mac_rd_index;
-static DEFINE_SEMAPHORE(swapi_sem);
+static DEFINE_SEMAPHORE(swapi_sem, 1);
 static int gsw_num = DEFAULT_SWITCH_NUM, hw_init = 1, id_argc = 0, addr_argc = 0;
 ethsw_api_dev_t *pedev0[GSW_DEV_MAX];
 port_config_t gpc[MAX_PORT_NUMBER];

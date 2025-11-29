@@ -12,19 +12,6 @@ struct module_notes_attrs {
     struct bin_attribute attrs[];
 };
 
-struct _ddebug {
-    /*
-	 * These fields are used to drive the user interface
-	 * for selecting and displaying debug callsites.
-	 */
-    const char *modname;
-    const char *function;
-    const char *filename;
-    const char *format;
-    unsigned int lineno:18;
-	atomic_t enabled;
-} __attribute__((aligned(8)));
-
 
 #define SF_DYNAMIC_DEBUG_BRANCH(descriptor) \
 	unlikely(atomic_read(&descriptor.enabled) > 0)
