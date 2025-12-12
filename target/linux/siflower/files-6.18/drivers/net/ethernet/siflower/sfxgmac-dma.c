@@ -1472,7 +1472,6 @@ static int xgmac_dma_probe(struct platform_device *pdev)
 	/* we run multiple netdevs on the same DMA ring so we need a dummy
 	 * device for NAPI to work
 	 */
-	init_dummy_netdev(&priv->napi_dev);
 
 	/* DMA IRQ */
 	ret = platform_get_irq_byname(pdev, "sbd");
