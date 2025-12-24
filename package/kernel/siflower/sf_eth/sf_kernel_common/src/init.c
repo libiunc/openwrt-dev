@@ -273,82 +273,11 @@ static int ddebug_parse_query(char *words[], int nwords,
 	return 0;
 }
 
-static int ddebug_change(const struct ddebug_query *query, int change)
-{
-	int i;
-	struct ddebug_table *dt;
-	unsigned int nfound = 0;
-
-	/* search for matching ddebugs */
-	mutex_lock(&ddebug_lock);
-	list_for_each_entry(dt, &ddebug_tables, link) {
-
-		/* match against the module name */
-		if (query->module &&
-		    !match_wildcard(query->module, dt->mod_name))
-			continue;
-
-		for (i = 0; i < dt->num_ddebugs; i++) {
-			struct _ddebug *dp = &dt->ddebugs[i];
-
-			/* match against the source filename */
-			if (query->filename &&
-			    !match_wildcard(query->filename, dp->filename) &&
-			    !match_wildcard(query->filename,
-					   kbasename(dp->filename)))
-				continue;
-
-			/* match against the function */
-			if (query->function &&
-			    !match_wildcard(query->function, dp->function))
-				continue;
-
-			/* match against the format */
-			if (query->format) {
-				if (*query->format == '^') {
-					char *p;
-					/* anchored search. match must be at beginning */
-					p = strstr(dp->format, query->format+1);
-					if (p != dp->format)
-						continue;
-				} else if (!strstr(dp->format, query->format))
-					continue;
-			}
-
-			/* match against the line number range */
-			if (query->first_lineno &&
-			    dp->lineno < query->first_lineno)
-				continue;
-			if (query->last_lineno &&
-			    dp->lineno > query->last_lineno)
-				continue;
-
-			nfound++;
-
-			if (change)
-				atomic_set(&dp->enabled, 1);
-			else
-				atomic_set(&dp->enabled, 0);
-
-			pr_debug("changed %s:%d [%s]%s =%d\n",
-				 trim_prefix(dp->filename), dp->lineno,
-				 dt->mod_name, dp->function,
-				 change);
-		}
-	}
-	mutex_unlock(&ddebug_lock);
-
-	if (!nfound)
-		pr_info("no matches for query\n");
-
-	return nfound;
-}
-
 static int ddebug_exec_query(char *query_string, const char *modname)
 {
 	struct ddebug_query query = {};
-#define MAXWORDS 9
-	int nwords, nfound, change;
+	#define MAXWORDS 9
+	int nwords, change;
 	char *words[MAXWORDS];
 
 	nwords = ddebug_tokenize(query_string, words, MAXWORDS);
@@ -356,7 +285,6 @@ static int ddebug_exec_query(char *query_string, const char *modname)
 		pr_err("tokenize failed\n");
 		return -EINVAL;
 	}
-	/* check flags 1st (last arg) so query is pairs of spec,val */
 	if (ddebug_parse_flags(words[nwords-1], &change)) {
 		pr_err("flags parse failed\n");
 		return -EINVAL;
@@ -365,11 +293,9 @@ static int ddebug_exec_query(char *query_string, const char *modname)
 		pr_err("query parse failed\n");
 		return -EINVAL;
 	}
-	/* actually go and implement the change */
-	nfound = ddebug_change(&query, change);
-	vpr_info_dq(&query, nfound ? "applied" : "no-match");
-
-	return nfound;
+	
+	pr_warn("sf_dynamic_debug: interface deprecated, use /sys/kernel/debug/dynamic_debug/\n");
+	return 0; // 无实际匹配
 }
 
 static int ddebug_exec_queries(char *query, const char *modname)
@@ -516,18 +442,6 @@ EXPORT_SYMBOL(sf_dynamic_debug_init);
  * and return a pointer to that first object.  Returns
  * NULL if there are no _ddebugs at all.
  */
-static struct _ddebug *ddebug_iter_first(struct ddebug_iter *iter)
-{
-	if (list_empty(&ddebug_tables)) {
-		iter->table = NULL;
-		iter->idx = 0;
-		return NULL;
-	}
-	iter->table = list_entry(ddebug_tables.next,
-				 struct ddebug_table, link);
-	iter->idx = 0;
-	return &iter->table->ddebugs[iter->idx];
-}
 
 /*
  * Advance the iterator to point to the next _ddebug
@@ -535,63 +449,18 @@ static struct _ddebug *ddebug_iter_first(struct ddebug_iter *iter)
  * and returns a pointer to the new _ddebug.  Returns
  * NULL if the iterator has seen all the _ddebugs.
  */
-static struct _ddebug *ddebug_iter_next(struct ddebug_iter *iter)
-{
-	if (iter->table == NULL)
-		return NULL;
-	if (++iter->idx == iter->table->num_ddebugs) {
-		/* iterate to next table */
-		iter->idx = 0;
-		if (list_is_last(&iter->table->link, &ddebug_tables)) {
-			iter->table = NULL;
-			return NULL;
-		}
-		iter->table = list_entry(iter->table->link.next,
-					 struct ddebug_table, link);
-	}
-	return &iter->table->ddebugs[iter->idx];
-}
 
 /*
  * Seq_ops start method.  Called at the start of every
  * read() call from userspace.  Takes the ddebug_lock and
  * seeks the seq_file's iterator to the given position.
  */
-static void *ddebug_proc_start(struct seq_file *m, loff_t *pos)
-{
-	struct ddebug_iter *iter = m->private;
-	struct _ddebug *dp;
-	int n = *pos;
-
-	mutex_lock(&ddebug_lock);
-
-	if (!n)
-		return SEQ_START_TOKEN;
-	if (n < 0)
-		return NULL;
-	dp = ddebug_iter_first(iter);
-	while (dp != NULL && --n > 0)
-		dp = ddebug_iter_next(iter);
-	return dp;
-}
 
 /*
  * Seq_ops next method.  Called several times within a read()
  * call from userspace, with ddebug_lock held.  Walks to the
  * next _ddebug object with a special case for the header line.
  */
-static void *ddebug_proc_next(struct seq_file *m, void *p, loff_t *pos)
-{
-	struct ddebug_iter *iter = m->private;
-	struct _ddebug *dp;
-
-	if (p == SEQ_START_TOKEN)
-		dp = ddebug_iter_first(iter);
-	else
-		dp = ddebug_iter_next(iter);
-	++*pos;
-	return dp;
-}
 
 /*
  * Seq_ops show method.  Called several times within a read()
@@ -599,47 +468,15 @@ static void *ddebug_proc_next(struct seq_file *m, void *p, loff_t *pos)
  * current _ddebug as a single human-readable line, with a
  * special case for the header line.
  */
-static int ddebug_proc_show(struct seq_file *m, void *p)
-{
-	struct ddebug_iter *iter = m->private;
-	struct _ddebug *dp = p;
-
-	if (p == SEQ_START_TOKEN) {
-		seq_puts(m,
-			 "# filename:lineno [module]function format\n");
-		return 0;
-	}
-
-	seq_printf(m, "%s:%u [%s]%s =%d \"",
-		   trim_prefix(dp->filename), dp->lineno,
-		   iter->table->mod_name, dp->function,
-		   atomic_read(&dp->enabled));
-	seq_escape(m, dp->format, "\t\r\n\"");
-	seq_puts(m, "\"\n");
-
-	return 0;
-}
 
 /*
  * Seq_ops stop method.  Called at the end of each read()
  * call from userspace.  Drops ddebug_lock.
  */
-static void ddebug_proc_stop(struct seq_file *m, void *p)
-{
-	mutex_unlock(&ddebug_lock);
-}
-
-static const struct seq_operations ddebug_proc_seqops = {
-	.start = ddebug_proc_start,
-	.next = ddebug_proc_next,
-	.show = ddebug_proc_show,
-	.stop = ddebug_proc_stop
-};
 
 static int ddebug_proc_open(struct inode *inode, struct file *file)
 {
-	return seq_open_private(file, &ddebug_proc_seqops,
-				sizeof(struct ddebug_iter));
+	return -ENOSYS;
 }
 
 #define USER_BUF_PAGE 4096
@@ -681,8 +518,8 @@ static int __init sf_kernel_common_init(void)
 {
 	int ret;
 
-	proc_mkdir("sf_dynamic_debug", NULL);
-	proc_create("sf_dynamic_debug/control", 0644, NULL, &proc_fops);
+	// proc_mkdir("sf_dynamic_debug", NULL);
+	// proc_create("sf_dynamic_debug/control", 0644, NULL, &proc_fops);
 	ret = fast_ping_probe();
 
 	return ret;

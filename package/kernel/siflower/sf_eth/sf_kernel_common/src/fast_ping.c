@@ -41,11 +41,6 @@ static inline void dump_addr(void)
 	}
 }
 
-static inline struct sock *icmp_sk(struct net *net)
-{
-        return this_cpu_read(*net->ipv4.icmp_sk);
-}
-
 static bool is_lan_ip4_addr(__be32 ip4)
 {
 	int i;
@@ -71,61 +66,80 @@ static bool is_lan_ip6_addr(struct in6_addr ip6)
 	return false;
 }
 
-static void inline dpns_ip4_make_skb(struct sk_buff *skb)
+static int dpns_ip4_make_skb(struct sk_buff *skb)
 {
 	struct ethhdr *ethhdr;
 	struct iphdr *iphdr;
 	struct icmphdr *icmphdr;
-	struct sock *sk = icmp_sk(dev_net(skb->dev));
+	struct net_device *dev = skb->dev;
+	struct net *net = dev_net(dev);
+	struct rtable *rt;
+	struct flowi4 fl4;
+	__be32 saddr, daddr;
+	int err;
 
 	ethhdr = (struct ethhdr*)(skb->data - ETH_HLEN);
 	iphdr = get_iphdr(skb);
 	icmphdr = (struct icmphdr*)((char *)iphdr + sizeof(*iphdr));
 
-	swap_mac_addr(ethhdr->h_dest, ethhdr->h_source);
+	// 交换地址
+	saddr = iphdr->daddr;  // 原目的地址作为源地址
+	daddr = iphdr->saddr;  // 原源地址作为目的地址
 
-	swap(iphdr->saddr, iphdr->daddr);
-	iphdr->ttl = (__u8)128;
-	iphdr->frag_off = htons(IP_DF);
-	ip_select_ident(sock_net(sk), skb, sk);
-	iphdr->check = 0;
-	iphdr->check = ip_fast_csum(iphdr, iphdr->ihl);
+	// 构建路由查找
+	memset(&fl4, 0, sizeof(fl4));
+	fl4.daddr = daddr;
+	fl4.saddr = saddr;
+	fl4.flowi4_proto = IPPROTO_ICMP;
 
-	icmphdr->type = ICMP_ECHOREPLY;
-	icmphdr->checksum = (__sum16)0;
+	rt = ip_route_output_key(net, &fl4);
+	if (IS_ERR(rt))
+		return PTR_ERR(rt);
 
-	skb->csum_start = (unsigned char *)icmphdr - skb->head;
-	skb->csum_offset = 2;
-	skb->ip_summed = CHECKSUM_PARTIAL;
+	// 构建 ICMP echo reply
+	err = icmp_send(rt->dst.dev, iphdr, icmphdr, sizeof(*icmphdr));
+	
+	ip_rt_put(rt);
+	return err;
 }
 
-static void dpns_ip6_make_skb(struct sk_buff *skb)
+static int dpns_ip6_make_skb(struct sk_buff *skb)
 {
 	struct ethhdr *ethhdr;
 	struct ipv6hdr *ipv6hdr;
 	struct icmp6hdr *icmp6hdr;
-	__u32 sum = 0;
-	__u16 csum;
+	struct net_device *dev = skb->dev;
+	struct net *net = dev_net(dev);
+	struct dst_entry *dst;
+	struct flowi6 fl6;
+	struct in6_addr saddr, daddr;
+	int err;
 
 	ethhdr = (struct ethhdr *)(skb->data - ETH_HLEN);
 	ipv6hdr = get_ipv6hdr(skb);
 	icmp6hdr = (struct icmp6hdr*)((char *)ipv6hdr + sizeof(*ipv6hdr));
-	swap_mac_addr(ethhdr->h_dest, ethhdr->h_source);
 
-	swap(ipv6hdr->saddr, ipv6hdr->daddr);
-	memset(ipv6hdr->flow_lbl, '0', 3);
-	ipv6hdr->hop_limit = 64;
+	// 交换地址
+	saddr = ipv6hdr->daddr;
+	daddr = ipv6hdr->saddr;
 
-	icmp6hdr->icmp6_type = ICMPV6_ECHO_REPLY;
-	//IPv6 pseudo-header checksum calculation;
-	sum += IPPROTO_ICMPV6;
-	sum += ntohs(ipv6hdr->payload_len);
-	sum = from32to16(sum);
-	csum = ~ntohs((__u16)sum);
-	icmp6hdr->icmp6_cksum = csum;
-	skb->csum_start = (unsigned char *)icmp6hdr - skb->head - 32;
-	skb->csum_offset = 34;
-	skb->ip_summed = CHECKSUM_PARTIAL;
+	// 构建路由查找
+	memset(&fl6, 0, sizeof(fl6));
+	fl6.daddr = daddr;
+	fl6.saddr = saddr;
+	fl6.flowi6_proto = IPPROTO_ICMPV6;
+
+	dst = ip6_route_output(net, NULL, &fl6);
+	if (dst->error) {
+		dst_release(dst);
+		return dst->error;
+	}
+
+	// 构建 ICMPv6 echo reply
+	err = icmp6_send(&fl6, ipv6hdr, icmp6hdr, sizeof(*icmp6hdr));
+	
+	dst_release(dst);
+	return err;
 }
 
 static void inline dpns_arp_make_skb(struct sk_buff *skb)
@@ -161,21 +175,22 @@ static unsigned int dpns_response_icmp_v4(struct sk_buff *skb)
 {
 	struct iphdr *iphdr;
 	struct icmphdr *icmphdr;
+	int err;
 
 	iphdr = get_iphdr(skb);
 	icmphdr = (struct icmphdr*)((char *)iphdr + sizeof(*iphdr));
 
 	if (iphdr->protocol == IPPROTO_ICMP && is_lan_ip4_addr(iphdr->daddr)
-					&&icmphdr->type == ICMP_ECHO) {
-		if (iphdr->frag_off != 0)  //Do Not Fragment
+					&& icmphdr->type == ICMP_ECHO) {
+		if (iphdr->frag_off != 0)  // Do Not Fragment
 			return NF_ACCEPT;
 
-		dpns_ip4_make_skb(skb);
-		skb_push(skb, ETH_HLEN);
-		skb_set_queue_mapping(skb, 2);
-		skb->dev->netdev_ops->ndo_start_xmit(skb, skb->dev);
-
-		return NF_STOLEN;
+		// 发送 ICMP reply
+		err = dpns_ip4_make_skb(skb);
+		if (err == 0) {
+			kfree_skb(skb);
+			return NF_STOLEN;
+		}
 	}
 
 	return NF_ACCEPT;
@@ -185,6 +200,7 @@ static unsigned int dpns_response_icmp_v6(struct sk_buff *skb)
 {
 	struct ipv6hdr *ipv6hdr;
 	struct icmp6hdr *icmp6hdr;
+	int err;
 
 	ipv6hdr = get_ipv6hdr(skb);
 	icmp6hdr = (struct icmp6hdr*)((char*)ipv6hdr + sizeof(*ipv6hdr));
@@ -193,12 +209,12 @@ static unsigned int dpns_response_icmp_v6(struct sk_buff *skb)
 				is_lan_ip6_addr(ipv6hdr->daddr) &&
 				icmp6hdr->icmp6_type == ICMPV6_ECHO_REQUEST) {
 
-		dpns_ip6_make_skb(skb);
-		skb_push(skb, ETH_HLEN);
-		skb_set_queue_mapping(skb, 1);
-		skb->dev->netdev_ops->ndo_start_xmit(skb, skb->dev);
-
-		return NF_STOLEN;
+		// 发送 ICMPv6 reply
+		err = dpns_ip6_make_skb(skb);
+		if (err == 0) {
+			kfree_skb(skb);
+			return NF_STOLEN;
+		}
 	}
 
 	return NF_ACCEPT;
@@ -256,7 +272,7 @@ EXPORT_SYMBOL(dpns_fast_ping_hook);
 
 static void dpns_fast_response_init_subnet_info(void)
 {
-        /* init lan subnet info */
+		/* init lan subnet info */
 	sprintf(sf_lan_addr[0].ifname, "br-lan");
 	sprintf(sf_lan_addr[1].ifname, "br0");
 	sprintf(sf_lan_addr[2].ifname, "br1");

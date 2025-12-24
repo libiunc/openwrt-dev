@@ -60,7 +60,7 @@ ioctl_wrapper_ctx_t *iwctx;
 #define ETHSW_API_DEV_NAME "switch_api"
 #if defined(KERNEL_MODE) && KERNEL_MODE
 /* Define and declare a semaphore, named swapi_sem, with a count of one */
-static DEFINE_SEMAPHORE(swapi_sem);
+static DEFINE_SEMAPHORE(swapi_sem, 1);
 static int gsw_api_open(struct inode *inode, struct file *filp);
 static int gsw_api_release(struct inode *inode, struct file *filp);
 static long gsw_api_ioctl(struct file *filp, u32 cmd, unsigned long arg);
