@@ -43,6 +43,7 @@ Package/grub2=$(call Package/grub2/Default,x86,pc)
 Package/grub2-efi=$(call Package/grub2/Default,x86,efi)
 Package/grub2-efi-arm=$(call Package/grub2/Default,armsr,efi)
 Package/grub2-efi-loongarch64=$(call Package/grub2/Default,loongarch64,efi)
+Package/grub2-efi-riscv64=$(call Package/grub2/Default,riscv64,efi)
 
 define Package/grub2-editenv
   CATEGORY:=Utilities
@@ -201,6 +202,19 @@ define Package/grub2-efi-loongarch64/install
 		-O loongarch64-efi \
 		-c $(PKG_BUILD_DIR)/grub-early.cfg \
 		-o $(STAGING_DIR_IMAGE)/grub2/bootloongarch64.efi \
+		boot chain configfile fat linux ls lsefi minicmd part_gpt part_msdos reboot search \
+		search_fs_uuid search_label serial efi_gop all_video gfxterm ext2
+endef
+
+define Package/grub2-efi-riscv64/install
+	$(INSTALL_DIR) $(STAGING_DIR_IMAGE)/grub2
+	cp ./files/grub-early-gpt.cfg $(PKG_BUILD_DIR)/grub-early.cfg
+	$(STAGING_DIR_HOST)/bin/grub-mkimage \
+		-d $(PKG_BUILD_DIR)/grub-core \
+		-p /boot/grub \
+		-O riscv64-efi \
+		-c $(PKG_BUILD_DIR)/grub-early.cfg \
+		-o $(STAGING_DIR_IMAGE)/grub2/bootriscv64.efi \
 		boot chain configfile fat linux ls lsefi minicmd part_gpt part_msdos reboot search \
 		search_fs_uuid search_label serial efi_gop all_video gfxterm ext2
 endef
